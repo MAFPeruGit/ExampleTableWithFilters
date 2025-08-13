@@ -1,0 +1,936 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Gestión de Clientes</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
+    <style>
+        :root {
+            --primary: #2c3e50;
+            --secondary: #3498db;
+            --success: #2ecc71;
+            --warning: #f39c12;
+            --danger: #e74c3c;
+            --light: #ecf0f1;
+            --dark: #2c3e50;
+            --filter-active: #3498db;
+            --filter-inactive: #95a5a6;
+            --header-bg: #1a2980;
+            --sort-active: #e74c3c;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', 'Roboto', sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, var(--header-bg), #26d0ce);
+            color: #333;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+        
+        header {
+            text-align: center;
+            padding: 30px 0;
+            color: white;
+        }
+        
+        header h1 {
+            font-size: 2.8rem;
+            margin-bottom: 15px;
+            text-shadow: 0 2px 8px rgba(0,0,0,0.3);
+        }
+        
+        header p {
+            font-size: 1.2rem;
+            max-width: 700px;
+            margin: 20px auto 0;
+            opacity: 0.9;
+            line-height: 1.6;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.25);
+            padding: 30px;
+            margin-top: 30px;
+            overflow: hidden;
+        }
+        
+        .table-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+            gap: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid var(--light);
+        }
+        
+        .controls {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+        
+        .btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 22px;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(26, 41, 128, 0.3);
+            font-size: 0.95rem;
+        }
+        
+        .btn:hover {
+            background: var(--secondary);
+            transform: translateY(-3px);
+            box-shadow: 0 6px 15px rgba(52, 152, 219, 0.4);
+        }
+        
+        .btn i {
+            font-size: 1.1rem;
+        }
+        
+        .btn-excel {
+            background: var(--success);
+            box-shadow: 0 4px 12px rgba(46, 204, 113, 0.3);
+        }
+        
+        .btn-excel:hover {
+            background: #27ae60;
+        }
+        
+        table.dataTable {
+            width: 100% !important;
+            border-collapse: separate;
+            border-spacing: 0;
+            font-size: 0.95rem;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        
+        table.dataTable thead th {
+            background: var(--primary);
+            color: white;
+            font-weight: 600;
+            padding: 16px 18px;
+            position: relative;
+            border-right: 1px solid rgba(255,255,255,0.1);
+            transition: background 0.3s ease;
+            cursor: pointer;
+        }
+        
+        table.dataTable thead th:first-child {
+            border-top-left-radius: 8px;
+        }
+        
+        table.dataTable thead th:last-child {
+            border-top-right-radius: 8px;
+            border-right: none;
+        }
+        
+        table.dataTable thead th:hover {
+            background: #1e2a38;
+        }
+        
+        table.dataTable thead th .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        table.dataTable thead th .header-title {
+            flex-grow: 1;
+        }
+        
+        table.dataTable tbody td {
+            padding: 14px 18px;
+            border-bottom: 1px solid #e0e0e0;
+            border-right: 1px solid #f0f0f0;
+        }
+        
+        table.dataTable tbody td:last-child {
+            border-right: none;
+        }
+        
+        table.dataTable tbody tr {
+            transition: background 0.2s ease;
+        }
+        
+        table.dataTable tbody tr:nth-child(even) {
+            background-color: #f8fafc;
+        }
+        
+        table.dataTable tbody tr:hover {
+            background-color: #e8f4ff;
+        }
+
+        table.dataTable thead>tr>th.sorting::after {
+            display: none !important;
+            content: none !important;
+        }
+
+        table.dataTable thead>tr>th.sorting::before {
+            display: none !important;
+            content: none !important;
+        }
+
+        table.dataTable thead>tr>th.sorting {
+            padding-right: 10px;
+        }
+        
+        .status-active {
+            background: #e8f5e9;
+            color: #27ae60;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-weight: 600;
+            display: inline-block;
+            font-size: 0.85rem;
+        }
+        
+        .check-icon {
+            color: var(--success);
+            font-size: 1.3rem;
+        }
+        
+        /* Botones de filtro */
+        .filter-btn {
+            background: none;
+            border: none;
+            color: var(--filter-inactive);
+            cursor: pointer;
+            margin-left: 10px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            padding: 0;
+            position: relative;
+        }
+        
+        .filter-btn.active {
+            color: var(--filter-active);
+            transform: scale(1.1);
+        }
+        
+        .filter-btn.active::after {
+            content: "";
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            width: 8px;
+            height: 8px;
+            background: var(--filter-active);
+            border-radius: 50%;
+        }
+        
+        .filter-btn:hover {
+            color: white;
+            transform: scale(1.1);
+        }
+        
+        /* Filtro estilo Excel */
+        .filter-panel {
+            position: absolute;
+            top: 60px;
+            left: 0;
+            width: 300px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.25);
+            z-index: 1000;
+            padding: 20px;
+            display: none;
+            max-height: 450px;
+            overflow-y: auto;
+            border: 1px solid #e0e0e0;
+        }
+        
+        .filter-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .filter-header h3 {
+            color: var(--primary);
+            font-size: 1.2rem;
+            font-weight: 700;
+        }
+        
+        .filter-close {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            color: #95a5a6;
+            cursor: pointer;
+            transition: color 0.3s;
+        }
+        
+        .filter-close:hover {
+            color: var(--danger);
+        }
+        
+        .filter-group {
+            margin-bottom: 20px;
+        }
+        
+        .filter-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #2c3e50;
+            font-size: 0.95rem;
+        }
+        
+        .filter-group input,
+        .filter-group select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 0.95rem;
+            transition: all 0.3s;
+        }
+        
+        .filter-group input:focus,
+        .filter-group select:focus {
+            outline: none;
+            border-color: var(--secondary);
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+        }
+        
+        .filter-actions {
+            display: flex;
+            gap: 12px;
+            margin-top: 10px;
+        }
+        
+        .filter-actions button {
+            flex: 1;
+            padding: 10px;
+            border-radius: 6px;
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .apply-btn {
+            background: var(--secondary);
+            color: white;
+        }
+        
+        .apply-btn:hover {
+            background: #2980b9;
+        }
+        
+        .reset-btn {
+            background: #f5f7fa;
+            color: #7f8c8d;
+            border: 1px solid #e0e0e0 !important;
+        }
+        
+        .reset-btn:hover {
+            background: #e0e0e0;
+        }
+        
+        /* Sección de ordenamiento */
+        .sort-section {
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .sort-title {
+            font-size: 1.1rem;
+            color: var(--primary);
+            margin-bottom: 12px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .sort-title i {
+            color: var(--sort-active);
+        }
+        
+        .sort-options {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .sort-btn-panel {
+            flex: 1;
+            padding: 8px 12px;
+            border-radius: 6px;
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+            background: #f5f7fa;
+            color: #7f8c8d;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            font-size: 0.9rem;
+        }
+        
+        .sort-btn-panel:hover {
+            background: #e0e0e0;
+        }
+        
+        .sort-btn-panel.active {
+            background: var(--sort-active);
+            color: white;
+        }
+
+        
+        /* Sección de rango de fechas */
+        .filter-section {
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .filter-title {
+            font-size: 1.1rem;
+            color: var(--primary);
+            margin-bottom: 12px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .filter-title i {
+            color: var(--sort-active);
+        }
+        
+        .filter-options {
+            display: flex;
+            gap: 10px;
+            flex-direction: column;
+        }
+        
+        .filter-div-panel {
+            flex: 1;
+            padding: 8px 12px;
+            border-radius: 6px;
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+            background: #f5f7fa;
+            color: #7f8c8d;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            font-size: 0.9rem;
+        }
+        
+        .filter-div-panel input[type=date] {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 0.95rem;
+            transition: all 0.3s;
+            background: transparent;
+            cursor: pointer;
+        }
+
+        footer {
+            text-align: center;
+            color: white;
+            padding: 30px 0;
+            margin-top: 30px;
+            font-size: 1rem;
+            opacity: 0.9;
+        }
+        
+        @media (max-width: 992px) {
+            .table-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .controls {
+                width: 100%;
+                justify-content: center;
+            }
+            
+            .filter-panel {
+                width: 280px;
+                left: 10px;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            header h1 {
+                font-size: 2.2rem;
+            }
+            
+            header p {
+                font-size: 1rem;
+            }
+            
+            .btn {
+                padding: 10px 16px;
+                font-size: 0.9rem;
+            }
+            
+            .filter-panel {
+                width: 260px;
+                padding: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1><i class="fas fa-users"></i> Sistema de Gestión de Clientes</h1>
+            <p>Haz clic en los botones de filtro <i class="fas fa-filter" style="color:#3498db"></i> para acceder a opciones de filtrado y ordenamiento</p>
+        </header>
+        
+        <div class="card">
+            <div class="table-header">
+                <h2><i class="fas fa-table"></i> Registro de Clientes</h2>
+                <div class="controls">
+                    <button class="btn btn-excel"><i class="fas fa-file-excel"></i> Exportar</button>
+                    <button class="btn"><i class="fas fa-sync-alt"></i> Actualizar</button>
+                </div>
+            </div>
+            
+            <table id="clientesTable" class="display">
+                <thead>
+                    <tr>
+                        <th>
+                            <div class="header-content">
+                                <div class="header-title">Sucursal</div>
+                                <button class="filter-btn" data-column="0">
+                                    <i class="fas fa-filter"></i>
+                                </button>
+                            </div>
+                        </th>
+                        <th>
+                            <div class="header-content">
+                                <div class="header-title">Cliente</div>
+                                <button class="filter-btn" data-column="1">
+                                    <i class="fas fa-filter"></i>
+                                </button>
+                            </div>
+                        </th>
+                        <th>
+                            <div class="header-content">
+                                <div class="header-title">Teléfono</div>
+                                <button class="filter-btn" data-column="2">
+                                    <i class="fas fa-filter"></i>
+                                </button>
+                            </div>
+                        </th>
+                        <th>
+                            <div class="header-content">
+                                <div class="header-title">Email</div>
+                                <button class="filter-btn" data-column="3">
+                                    <i class="fas fa-filter"></i>
+                                </button>
+                            </div>
+                        </th>
+                        <th>
+                            <div class="header-content">
+                                <div class="header-title">Estado</div>
+                                <button class="filter-btn" data-column="4">
+                                    <i class="fas fa-filter"></i>
+                                </button>
+                            </div>
+                        </th>
+                        <th>
+                            <div class="header-content">
+                                <div class="header-title">Resultado</div>
+                                <button class="filter-btn" data-column="5">
+                                    <i class="fas fa-filter"></i>
+                                </button>
+                            </div>
+                        </th>
+                        <th>
+                            <div class="header-content">
+                                <div class="header-title">Notas</div>
+                                <button class="filter-btn" data-column="6">
+                                    <i class="fas fa-filter"></i>
+                                </button>
+                            </div>
+                        </th>
+                        <th>
+                            <div class="header-content">
+                                <div class="header-title">Fecha</div>
+                                <button class="filter-btn" data-column="7">
+                                    <i class="fas fa-filter"></i>
+                                </button>
+                            </div>
+                        </th>
+                        <th>
+                            <div class="header-content">
+                                <div class="header-title">Asesor</div>
+                                <button class="filter-btn" data-column="8">
+                                    <i class="fas fa-filter"></i>
+                                </button>
+                            </div>
+                        </th>
+                        <th>
+                            <div class="header-content">
+                                <div class="header-title">Asignado</div>
+                                <button class="filter-btn" data-column="9">
+                                    <i class="fas fa-filter"></i>
+                                </button>
+                            </div>
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Tacna 1</td>
+                        <td>Metzger Del Alcazar Gaston</td>
+                        <td>999088095</td>
+                        <td>gmetzger32@gmail.com</td>
+                        <td><span class="status-active">Vigente</span></td>
+                        <td>TEST</td>
+                        <td>NO DESEA RENOVAR</td>
+                        <td>05/08/2025</td>
+                        <td>-</td>
+                        <td>Gaston Metzger</td>
+                    </tr>
+                    <tr>
+                        <td>Tacna 1</td>
+                        <td>WILBER YUFRIN FLORES MAMANI</td>
+                        <td>953918835</td>
+                        <td>yufrin.fm@gmail.com</td>
+                        <td><span class="status-active">Vigente</span></td>
+                        <td>PRUEBA</td>
+                        <td>Reagendar llamada - Contactado.</td>
+                        <td>05/08/2025</td>
+                        <td>-</td>
+                        <td>Gustavo Westres</td>
+                    </tr>
+                    <tr>
+                        <td>Tacna 1</td>
+                        <td>NANCY PATRICIA CHAVEZ VILCA</td>
+                        <td>953074756</td>
+                        <td>capricornio_vilca@hotmail.com</td>
+                        <td><span class="status-active">Vigente</span></td>
+                        <td>PRUEBA</td>
+                        <td>Reagendar llamada - Contactado.</td>
+                        <td>05/08/2025</td>
+                        <td>-</td>
+                        <td>Maria Briccia</td>
+                    </tr>
+                    <tr>
+                        <td>Tacna</td>
+                        <td>Inversiones Y Capitales Peruanas S.A.</td>
+                        <td>943595892</td>
+                        <td>cony.huachaca@incaperuanas.com</td>
+                        <td><span class="status-active">Vigente</span></td>
+                        <td>PRUEBA</td>
+                        <td>DESEA AVANZAR CON SUS CUOTAS, INTERESADO</td>
+                        <td>09/08/2025</td>
+                        <td>-</td>
+                        <td>Gaston Metzger</td>
+                    </tr>
+                    <tr>
+                        <td>Tacna 1</td>
+                        <td>CARLOS RODRIGO SALAMANCA MAMANI</td>
+                        <td>930917319</td>
+                        <td>karlos_1202@hotmail.com</td>
+                        <td><span class="status-active">Vigente</span></td>
+                        <td>ASIGNADO</td>
+                        <td>cliente visitará el 7/8</td>
+                        <td>05/08/2025</td>
+                        <td>-</td>
+                        <td>Arturo Sorrión Santillana</td>
+                    </tr>
+                    <tr>
+                        <td>Tacna 1</td>
+                        <td>RAMIRO ESPINOZA TAPIA</td>
+                        <td>942922994</td>
+                        <td>espinozatapiaramiro1978@gmail.com</td>
+                        <td><span class="status-active">Vigente</span></td>
+                        <td>TEST</td>
+                        <td>Interesado a futuro, llamar en 3 meses</td>
+                        <td>05/08/2025</td>
+                        <td>-</td>
+                        <td>Arturo Sorrión Santillana</td>
+                    </tr>
+                    <tr>
+                        <td>Tacna 1</td>
+                        <td>SEFERINO MAYTA CHUCUYA</td>
+                        <td>937388931</td>
+                        <td>elmerabdoncandiaaguilar@gmail.com</td>
+                        <td><span class="status-active">Vigente</span></td>
+                        <td>TEST</td>
+                        <td>NO DESEA RENOVAR</td>
+                        <td>05/08/2025</td>
+                        <td>-</td>
+                        <td>Gustavo Westres</td>
+                    </tr>
+                </tbody>
+            </table>
+            
+            <!-- Panel de Filtros -->
+            <div id="filterPanel" class="filter-panel">
+                <div class="filter-header">
+                    <h3 id="filterTitle"><i class="fas fa-filter"></i> Filtros de </h3>
+                    <button class="filter-close">&times;</button>
+                </div>
+                
+                <div class="sort-section">
+                    <div class="sort-title">
+                        <i class="fas fa-sort"></i> Ordenar columna
+                    </div>
+                    <div class="sort-options">
+                        <button class="sort-btn-panel" id="sortAsc">
+                            <i class="fas fa-arrow-up"></i> Ascendente
+                        </button>
+                        <button class="sort-btn-panel" id="sortDesc">
+                            <i class="fas fa-arrow-down"></i> Descendente
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="filter-group" id="contentFilterText">
+                    <label id="filterLabel">Contiene:</label>
+                    <input type="text" id="filterInput" placeholder="Ingrese valor para filtrar...">
+                </div>
+
+                <div class="filter-group" id="contentFilterResultManager">
+                    <label id="filterLabel">Resultado de Gestión:</label>
+                    <Select type="text" id="filterSelect" placeholder="Ingrese valor para filtrar...">
+                        <option value="TEST">TEST</option>
+                        <option value="PRUEBA">PRUEBA</option>
+                        <option value="ASIGNADO">ASIGNADO</option>
+                    </Select>
+                </div>
+
+                <div class="filter-section" id="contentFilterRangeDate">
+                    <div class="filter-title">
+                        <i class="fas fa-sort"></i> Filtrar por Rango de Fechas
+                    </div>
+                    <div class="filter-options">
+                        <div class="filter-div-panel">
+                            <label id="filterLabel">Desde:</label>
+                            <input type="date" id="filterDateFrom" placeholder="dd/mm/yyyy">
+                        </div>
+                        <div class="filter-div-panel">
+                            <label id="filterLabel">Hasta:</label>
+                            <input type="date" id="filterDateTo" placeholder="dd/mm/yyyy">
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="filter-actions">
+                    <button class="apply-btn" id="applyFilter">Aplicar Filtro</button>
+                    <button class="reset-btn" id="resetFilter">Restablecer</button>
+                </div>
+            </div>
+        </div>
+        
+        <footer>
+            <p>Sistema de Gestión de Clientes &copy; 2025 | Desarrollado con DataTables</p>
+        </footer>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            // Inicializar DataTable
+            var table = $('#clientesTable').DataTable({
+                language: {
+                    url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json'
+                },
+                pageLength: 10,
+                responsive: true,
+                orderable: false,
+                columnDefs: [
+                    //{ targets: [0, 4, 5], orderable: false }
+                ],
+                initComplete: function() {
+                    // Inicializar todos los botones de filtro
+                    $('.filter-btn').removeClass('active');
+                }
+            });
+            
+            // Variables para el panel de filtros
+            const filterPanel = $('#filterPanel');
+            let currentColumnIndex = null;
+            const filterButtons = $('.filter-btn');
+            
+            // Mostrar panel de filtros al hacer clic en un botón de filtro
+            filterButtons.on('click', function(e) {
+                e.stopPropagation();
+                currentColumnIndex = $(this).data('column');
+                const column = table.column(currentColumnIndex);
+                const columnTitle = $(column.header()).find('.header-title').text().trim();
+
+                if([7].includes(currentColumnIndex)) { //FECHAS
+                    $("#contentFilterText").css({ 'display': 'none'});     
+                    $("#contentFilterResultManager").css({'display': 'none'}); 
+                    $("#contentFilterRangeDate").css({'display': 'block'});  
+                }
+                else if([5].includes(currentColumnIndex)) { //RESULTADOS DE GESTION                
+                    $("#contentFilterText").css({ 'display': 'none'});
+                    $("#contentFilterResultManager").css({'display': 'block'}); 
+                    $("#contentFilterRangeDate").css({'display': 'none'}); 
+                }
+                else { //FILTROS DE TEXTO 
+                    $("#contentFilterText").css({ 'display': 'block'});
+                    $("#contentFilterResultManager").css({'display': 'none'}); 
+                    $("#contentFilterRangeDate").css({'display': 'none'}); 
+                }
+                
+                // Actualizar título del panel
+                $('#filterTitle').html(`<i class="fas fa-filter"></i> Filtros de ${columnTitle}`);
+                //$('#filterLabel').text(`Filtrar por ${columnTitle}:`);
+                
+                // Posicionar el panel
+                const buttonPos = $(this).offset();
+                filterPanel.css({
+                    'display': 'block',
+                    'top': buttonPos.top + $(this).outerHeight() + 10,
+                    'left': buttonPos.left
+                });
+                
+                // Obtener el valor actual del filtro
+                $('#filterInput').val(column.search() || '');
+                $('#filterInput').focus();
+                
+                // Resetear botones de ordenamiento
+                $('.sort-btn-panel').removeClass('active');
+            });
+            
+            // Cerrar panel
+            $('.filter-close').on('click', function() {
+                filterPanel.hide();
+            });
+            
+            // Cerrar panel al hacer clic fuera
+            $(document).on('click', function(e) {
+                if (!$(e.target).closest('.filter-panel, .filter-btn').length) {
+                    filterPanel.hide();
+                }
+            });
+            
+            // Aplicar filtro a la columna
+            $('#applyFilter').on('click', function() {
+                if (currentColumnIndex !== null) {
+                    let applyFilter = false;
+                    if([7].includes(currentColumnIndex)) { //FECHAS  
+                        const filterValueFrom = $('#filterDateFrom').val();
+                        const filterValueTo = $('#filterDateTo').val();
+                        console.log("apply filter DateRange", filterValueFrom, filterValueTo);
+                    }
+                    else if([5].includes(currentColumnIndex)) { //RESULTADOS DE GESTION  
+                        const filterValue = $('#filterSelect').val();
+                        table.column(currentColumnIndex).search(filterValue).draw();
+                        applyFilter = true;
+                    }
+                    else { //FILTROS DE TEXTO 
+                        const filterValue = $('#filterInput').val();
+                        table.column(currentColumnIndex).search(filterValue).draw();
+                        applyFilter = true;
+                    }
+                    
+                    // Actualizar estado del botón
+                    if (applyFilter) {
+                        $(`.filter-btn[data-column="${currentColumnIndex}"]`).addClass('active');
+                    } else {
+                        $(`.filter-btn[data-column="${currentColumnIndex}"]`).removeClass('active');
+                    }
+                }
+                filterPanel.hide();
+            });
+            
+            // Restablecer filtro para la columna
+            $('#resetFilter').on('click', function() {
+                if (currentColumnIndex !== null) {
+                    $('#filterInput').val('');
+                    table.column(currentColumnIndex).search('').draw();
+                    $(`.filter-btn[data-column="${currentColumnIndex}"]`).removeClass('active');
+                    filterPanel.hide();
+                }
+            });
+            
+            // También aplicar al presionar Enter en el input
+            $('#filterInput').on('keyup', function(e) {
+                if (e.key === 'Enter') {
+                    $('#applyFilter').click();
+                }
+            });
+            
+            // Botón de orden ascendente en panel
+            $('#sortAsc').on('click', function() {
+                if (currentColumnIndex !== null) {
+                    table.order([ [currentColumnIndex, 'asc'] ]).draw();
+                    $(this).addClass('active');
+                    $('#sortDesc').removeClass('active');
+                    filterPanel.hide();
+                }
+            });
+            
+            // Botón de orden descendente en panel
+            $('#sortDesc').on('click', function() {
+                if (currentColumnIndex !== null) {
+                    table.order([ [currentColumnIndex, 'desc'] ]).draw();
+                    $(this).addClass('active');
+                    $('#sortAsc').removeClass('active');
+                    filterPanel.hide();
+                }
+            });
+            
+            // Botón de exportar a Excel
+            $('.btn-excel').on('click', function() {
+                alert('Exportando datos a Excel...');
+                setTimeout(function() {
+                    alert('Exportación completada exitosamente');
+                }, 800);
+            });
+            
+            // Botón de actualizar datos
+            $('.btn').eq(1).on('click', function() {
+                const btn = $(this);
+                btn.html('<i class="fas fa-spinner fa-spin"></i> Actualizando...');
+                setTimeout(function() {
+                    btn.html('<i class="fas fa-sync-alt"></i> Actualizar Datos');
+                    alert('Datos actualizados correctamente');
+                }, 1500);
+            });
+        });
+    </script>
+</body>
+</html>
